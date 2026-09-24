@@ -1,0 +1,89 @@
+/*
+  Sabby Design Tokens
+  Derived from UI-DESIGN-BRIEF.md, section 2 — with the accent family
+  replaced per the finalized branding decision: purple/lilac + black + white.
+*/
+
+:root {
+  /* Background layers */
+  --color-bg:           #FFFFFF;   /* Page background */
+  --color-surface:      #F9F9F9;   /* Cards, sidebar, panels */
+  --color-surface-2:    #F2F2F2;   /* Hover states, nested surfaces */
+
+  /* Text */
+  --color-text-primary:    #0D0D0D;   /* Headlines, primary labels */
+  --color-text-secondary:  #6B6B6B;   /* Supporting text, timestamps */
+  --color-text-disabled:   #ADADAD;   /* Placeholder, locked UI */
+  --color-text-inverse:    #FFFFFF;   /* Text on dark/accent backgrounds */
+
+  /* Border */
+  --color-border:          #E5E5E5;   /* Default border */
+  --color-border-focus:    var(--color-accent);
+
+  /* Accent — brand purple/lilac */
+  --color-accent:          #6D28D9;   /* Deep violet — primary buttons, active states, links */
+  --color-accent-hover:    #5B21B6;   /* Hover/pressed state */
+  --color-accent-light:    #F3E8FF;   /* Badge backgrounds, subtle highlights, selected-row tint */
+  --color-accent-soft:     #C4B5FD;   /* Soft lilac — secondary badges, chart fills, decorative accents */
+
+  /* Semantic states (unchanged — functional, not brand colors) */
+  --color-success:         #16A34A;
+  --color-success-bg:      #F0FDF4;
+  --color-warning:         #D97706;
+  --color-warning-bg:      #FFFBEB;
+  --color-danger:          #DC2626;
+  --color-danger-bg:       #FEF2F2;
+  --color-info:            #0284C7;
+  --color-info-bg:         #F0F9FF;
+
+  /* Overlay */
+  --color-overlay:         rgba(0, 0, 0, 0.40);
+
+  /* Typography scale (rem, base = 16px) */
+  /* Montserrat used as a free stand-in for Gotham (geometric sans, similar proportions). */
+  --font-family-base: 'Montserrat', -apple-system, BlinkMacSystemFont, sans-serif;
+
+  --text-display:   2.25rem;   /* 36px — page headlines, storefront hero */
+  --text-h1:        1.875rem;  /* 30px — section titles */
+  --text-h2:        1.5rem;    /* 24px — card titles, sub-section headers */
+  --text-h3:        1.25rem;   /* 20px — widget titles, drawer headers */
+  --text-body:      1rem;      /* 16px — primary reading content */
+  --text-body-sm:   0.875rem;  /* 14px — table rows, labels, secondary text */
+  --text-caption:   0.75rem;   /* 12px — timestamps, footnotes, badges */
+
+  --leading-heading: 1.2;
+  --leading-body:     1.6;
+  --leading-compact:  1.5;
+
+  --weight-regular:  400;
+  --weight-medium:   500;
+  --weight-semibold: 600;
+  --weight-bold:     700;
+
+  /* Spacing scale — base unit 4px */
+  --space-1:  0.25rem;  /* 4px */
+  --space-2:  0.5rem;   /* 8px */
+  --space-3:  0.75rem;  /* 12px */
+  --space-4:  1rem;     /* 16px */
+  --space-5:  1.25rem;  /* 20px */
+  --space-6:  1.5rem;   /* 24px */
+  --space-8:  2rem;     /* 32px */
+  --space-10: 2.5rem;   /* 40px */
+  --space-12: 3rem;     /* 48px */
+  --space-16: 4rem;     /* 64px */
+
+  /* Corner radius */
+  --radius-sm:   4px;    /* badges, chips, input fields */
+  --radius-md:   8px;    /* cards, modals, dropdowns */
+  --radius-lg:   12px;   /* large cards, image containers */
+  --radius-xl:   16px;   /* mobile bottom sheets */
+  --radius-full: 9999px; /* pills, avatar circles */
+
+  /* Shadows — floating layers only (modals, dropdowns, toasts). Cards use border, not shadow. */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
+
+  /* Breakpoints (reference only — use in media queries, not var() since CSS vars can't be used in @media) */
+  /* mobile: 0-767px, tablet: 768-1279px, desktop: 1280px+ */
+}

@@ -1,0 +1,1133 @@
+<!doctype html>
+
+<html class="light" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Sabyy Merchant Dashboard</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500;600&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary-container": "#7c3aed",
+              "primary-fixed-dim": "#d2bbff",
+              "on-secondary": "#ffffff",
+              "on-secondary-fixed": "#29074a",
+              "secondary-container": "#d9b5ff",
+              tertiary: "#4e4e55",
+              "on-primary": "#ffffff",
+              "on-tertiary": "#ffffff",
+              "on-background": "#131b2e",
+              "surface-variant": "#dae2fd",
+              "on-error-container": "#93000a",
+              primary: "#630ed4",
+              "inverse-surface": "#283044",
+              "on-surface-variant": "#4a4455",
+              "surface-container-low": "#f2f3ff",
+              "surface-bright": "#faf8ff",
+              "on-error": "#ffffff",
+              "tertiary-fixed-dim": "#c7c5cd",
+              error: "#ba1a1a",
+              "on-secondary-fixed-variant": "#573878",
+              "tertiary-container": "#66666d",
+              "surface-container": "#eaedff",
+              "secondary-fixed": "#efdbff",
+              "on-tertiary-fixed": "#1a1b21",
+              "on-tertiary-container": "#e6e5ed",
+              "primary-fixed": "#eaddff",
+              "secondary-fixed-dim": "#dbb8ff",
+              outline: "#7b7487",
+              "inverse-primary": "#d2bbff",
+              "surface-container-high": "#e2e7ff",
+              "inverse-on-surface": "#eef0ff",
+              "on-primary-fixed": "#25005a",
+              "on-secondary-container": "#614283",
+              "surface-tint": "#732ee4",
+              secondary: "#6f5092",
+              surface: "#faf8ff",
+              "outline-variant": "#ccc3d8",
+              "on-tertiary-fixed-variant": "#46464d",
+              "surface-dim": "#d2d9f4",
+              "surface-container-highest": "#dae2fd",
+              "on-primary-container": "#ede0ff",
+              background: "#faf8ff",
+              "tertiary-fixed": "#e3e1e9",
+              "surface-container-lowest": "#ffffff",
+              "on-primary-fixed-variant": "#5a00c6",
+              "on-surface": "#131b2e",
+              "error-container": "#ffdad6",
+            },
+            borderRadius: {
+              DEFAULT: "0.25rem",
+              lg: "0.5rem",
+              xl: "0.75rem",
+              "2xl": "1rem",
+              "3xl": "1.5rem",
+              full: "9999px",
+            },
+            spacing: {
+              "unit-sm": "8px",
+              "margin-desktop": "48px",
+              "unit-lg": "24px",
+              gutter: "24px",
+              "unit-xs": "4px",
+              "container-max": "1280px",
+              "unit-md": "16px",
+              "margin-mobile": "20px",
+              "unit-xl": "48px",
+            },
+            fontFamily: {
+              "headline-xl": ["Geist"],
+              "body-lg": ["Geist"],
+              "body-md": ["Geist"],
+              "headline-lg-mobile": ["Geist"],
+              "label-md": ["Geist"],
+              "label-sm": ["Geist"],
+              "body-sm": ["Geist"],
+              "headline-lg": ["Geist"],
+              "headline-sm": ["Geist"],
+              "headline-md": ["Geist"],
+              mono: ["Geist Mono", "monospace"],
+            },
+            fontSize: {
+              "headline-xl": [
+                "48px",
+                {
+                  lineHeight: "56px",
+                  letterSpacing: "-0.02em",
+                  fontWeight: "700",
+                },
+              ],
+              "body-lg": ["18px", { lineHeight: "28px", fontWeight: "400" }],
+              "body-md": ["16px", { lineHeight: "24px", fontWeight: "400" }],
+              "headline-lg-mobile": [
+                "24px",
+                { lineHeight: "32px", fontWeight: "600" },
+              ],
+              "label-md": [
+                "14px",
+                {
+                  lineHeight: "20px",
+                  letterSpacing: "0.01em",
+                  fontWeight: "500",
+                },
+              ],
+              "label-sm": ["12px", { lineHeight: "16px", fontWeight: "600" }],
+              "body-sm": ["14px", { lineHeight: "20px", fontWeight: "400" }],
+              "headline-lg": [
+                "32px",
+                {
+                  lineHeight: "40px",
+                  letterSpacing: "-0.01em",
+                  fontWeight: "600",
+                },
+              ],
+              "headline-sm": [
+                "20px",
+                { lineHeight: "28px", fontWeight: "600" },
+              ],
+              "headline-md": [
+                "24px",
+                { lineHeight: "32px", fontWeight: "600" },
+              ],
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      .material-symbols-outlined {
+        font-variation-settings:
+          "FILL" 0,
+          "wght" 400,
+          "GRAD" 0,
+          "opsz" 24;
+      }
+      /* Custom scrollbar for bento cards */
+      .bento-scroll::-webkit-scrollbar {
+        width: 4px;
+      }
+      .bento-scroll::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      .bento-scroll::-webkit-scrollbar-thumb {
+        background-color: #d2d9f4;
+        border-radius: 4px;
+      }
+    </style>
+  </head>
+  <body
+    class="bg-background text-on-surface font-body-md antialiased min-h-screen flex"
+  >
+    <!-- Slim SideNavBar -->
+    <nav
+      class="hidden md:flex bg-surface-container-lowest dark:bg-inverse-surface text-label-md font-label-md border-r border-outline-variant dark:border-outline fixed left-0 top-0 h-full flex-col py-unit-md z-20 w-64 items-start"
+    >
+      <div class="mb-unit-lg flex items-center w-full justify-start px-6">
+        <img
+          alt="Sabyy Logo"
+          class="w-10 h-10 rounded-lg shadow-sm"
+          src="https://lh3.googleusercontent.com/aida-public/AB6AXuBrYN5upeK7fq5JtcukhthlB1FnjUgVH-FZn630wZ1w4a8rn9l591R6V6ikIMQ8dq1asZVEyNUUaru8v_clhqXam62v2oUcpGXyUAzG41d1H2IYr51k2-AmqhFXiLm6Ygh4QO18aB8w_alcnOMq2mAbxwOzhvFiZxChVoL0fc-xyBU8H7hSwTI2fGXr9RkNP0b6swJY8fSCyL3QqApJCdlr1Qk_fS_9cxYFwx6wn8sgCgUafZ_eCJ4_"
+        />
+      </div>
+      <div class="flex-1 w-full px-2">
+        <ul class="space-y-3 flex flex-col items-center w-full">
+          <li class="w-full relative group">
+            <a
+              class="flex items-center gap-4 py-3 px-6 w-full text-primary bg-primary-container/10 border-r-4 border-primary transition-all"
+              href="#"
+              ><span
+                class="material-symbols-outlined text-[24px]"
+                data-icon="dashboard"
+                >dashboard</span
+              ><span class="font-medium">Dashboard</span></a
+            >
+          </li>
+          <li class="w-full relative group">
+            <a
+              class="flex items-center gap-4 py-3 px-6 w-full text-on-surface-variant hover:bg-surface-container-low hover:text-primary transition-colors"
+              href="#"
+              ><span
+                class="material-symbols-outlined text-[24px]"
+                data-icon="inventory_2"
+                >inventory_2</span
+              ><span class="font-medium">Products</span></a
+            >
+          </li>
+          <li class="w-full relative group">
+            <a
+              class="flex items-center gap-4 py-3 px-6 w-full text-on-surface-variant hover:bg-surface-container-low hover:text-primary transition-colors"
+              href="#"
+              ><span
+                class="material-symbols-outlined text-[24px]"
+                data-icon="shopping_cart"
+                >shopping_cart</span
+              ><span class="font-medium">Orders</span></a
+            >
+          </li>
+          <li class="w-full relative group">
+            <a
+              class="flex items-center gap-4 py-3 px-6 w-full text-on-surface-variant hover:bg-surface-container-low hover:text-primary transition-colors"
+              href="#"
+              ><span
+                class="material-symbols-outlined text-[24px]"
+                data-icon="group"
+                >group</span
+              ><span class="font-medium">Customers</span></a
+            >
+          </li>
+          <li class="w-full relative group">
+            <a
+              class="flex items-center gap-4 py-3 px-6 w-full text-on-surface-variant hover:bg-surface-container-low hover:text-primary transition-colors"
+              href="#"
+              ><span
+                class="material-symbols-outlined text-[24px]"
+                data-icon="monitoring"
+                >monitoring</span
+              ><span class="font-medium">Analytics</span></a
+            >
+          </li>
+          <li class="w-full relative group">
+            <a
+              class="flex items-center gap-4 py-3 px-6 w-full text-on-surface-variant hover:bg-surface-container-low hover:text-primary transition-colors"
+              href="#"
+              ><span
+                class="material-symbols-outlined text-[24px]"
+                data-icon="account_balance_wallet"
+                >account_balance_wallet</span
+              ><span class="font-medium">Sabyy Wallet</span></a
+            >
+          </li>
+          <li class="w-full relative group">
+            <a
+              class="flex items-center gap-4 py-3 px-6 w-full text-on-surface-variant hover:bg-surface-container-low hover:text-primary transition-colors"
+              href="#"
+              ><span
+                class="material-symbols-outlined text-[24px]"
+                data-icon="campaign"
+                >campaign</span
+              ><span class="font-medium">Sales &amp; Marketing</span></a
+            >
+          </li>
+          <li class="w-full relative group">
+            <a
+              class="flex items-center gap-4 py-3 px-6 w-full text-on-surface-variant hover:bg-surface-container-low hover:text-primary transition-colors"
+              href="#"
+              ><span
+                class="material-symbols-outlined text-[24px]"
+                data-icon="extension"
+                >extension</span
+              ><span class="font-medium">Extensions</span></a
+            >
+          </li>
+          <li class="w-full relative group">
+            <a
+              class="flex items-center gap-4 py-3 px-6 w-full text-on-surface-variant hover:bg-surface-container-low hover:text-primary transition-colors"
+              href="#"
+              ><span
+                class="material-symbols-outlined text-[24px]"
+                data-icon="apps"
+                >apps</span
+              ><span class="font-medium">More</span></a
+            >
+          </li>
+          <li class="w-full pt-4 mt-2 border-t border-outline-variant/30 px-6">
+            <span
+              class="text-[10px] uppercase tracking-widest text-on-surface-variant/60 font-bold"
+              >Management</span
+            >
+          </li>
+          <li class="w-full relative group">
+            <a
+              class="flex items-center gap-4 py-3 px-6 w-full text-on-surface-variant hover:text-primary transition-colors"
+              href="#"
+              ><span
+                class="material-symbols-outlined text-[24px]"
+                data-icon="settings_applications"
+                >settings_applications</span
+              ><span class="font-medium">Operations</span></a
+            >
+          </li>
+          <li class="w-full relative group">
+            <a
+              class="flex items-center gap-4 py-3 px-6 w-full text-on-surface-variant hover:text-primary transition-colors"
+              href="#"
+              ><span
+                class="material-symbols-outlined text-[24px]"
+                data-icon="payments"
+                >payments</span
+              ><span class="font-medium">Finance</span></a
+            >
+          </li>
+          <li class="w-full relative group">
+            <a
+              class="flex items-center gap-4 py-3 px-6 w-full text-on-surface-variant hover:text-primary transition-colors"
+              href="#"
+              ><span
+                class="material-symbols-outlined text-[24px]"
+                data-icon="storefront"
+                >storefront</span
+              ><span class="font-medium">Store Setup</span></a
+            >
+          </li>
+          <li class="w-full relative group">
+            <a
+              class="flex items-center gap-4 py-3 px-6 w-full text-on-surface-variant hover:text-primary transition-colors"
+              href="#"
+              ><span
+                class="material-symbols-outlined text-[24px]"
+                data-icon="trending_up"
+                >trending_up</span
+              ><span class="font-medium">Grow With Bumpa</span></a
+            >
+          </li>
+        </ul>
+      </div>
+      <div
+        class="mt-auto pt-unit-md w-full px-2 border-t border-outline-variant flex flex-col items-center space-y-3"
+      >
+        <a
+          class="flex items-center gap-4 py-3 px-6 w-full text-on-surface-variant hover:bg-surface-container-low hover:text-primary transition-colors"
+          href="#"
+          ><span class="material-symbols-outlined text-[24px]" data-icon="help"
+            >help</span
+          ><span class="font-medium">Help Center</span></a
+        ><a
+          class="flex items-center gap-4 py-3 px-6 w-full text-on-surface-variant hover:bg-surface-container-low hover:text-primary transition-colors"
+          href="#"
+          ><span
+            class="material-symbols-outlined text-[24px]"
+            data-icon="settings"
+            >settings</span
+          ><span class="font-medium">Settings</span></a
+        >
+      </div>
+    </nav>
+    <!-- Main Content Area -->
+    <div class="flex-1 flex flex-col w-full min-h-screen md:ml-64">
+      <!-- TopNavBar -->
+      <header
+        class="bg-surface/80 backdrop-blur-md dark:bg-background/80 text-label-md font-label-md sticky top-0 w-full z-10 border-b border-outline-variant/50 shadow-sm dark:shadow-none flex justify-between items-center h-16 px-unit-lg"
+      >
+        <div class="flex items-center gap-unit-lg">
+          <div
+            class="hidden md:flex items-center gap-2 text-on-surface-variant"
+          >
+            <span
+              class="material-symbols-outlined text-[20px]"
+              data-icon="location_on"
+              >location_on</span
+            >
+            Location: Headquarters
+          </div>
+        </div>
+        <div class="flex items-center gap-unit-md">
+          <button
+            class="text-primary font-label-md px-4 py-2 rounded-lg bg-surface-container-low hover:bg-surface-container-high transition-colors"
+          >
+            Point of Sale
+          </button>
+          <button
+            class="bg-primary text-on-primary px-4 py-2 rounded-lg font-label-md hover:opacity-90 shadow-sm transition-all"
+          >
+            View Store
+          </button>
+          <div
+            class="flex items-center gap-2 ml-4 border-l border-outline-variant pl-4"
+          >
+            <button
+              class="text-on-surface-variant hover:text-primary transition-colors w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container-low"
+            >
+              <span class="material-symbols-outlined" data-icon="notifications"
+                >notifications</span
+              >
+            </button>
+            <div
+              class="w-9 h-9 rounded-full bg-primary-fixed-dim ml-2 flex items-center justify-center text-primary-fixed font-bold border-2 border-surface overflow-hidden cursor-pointer shadow-sm"
+            >
+              <img
+                alt="Tech Marshall Profile"
+                class="w-full h-full object-cover"
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuDSROe-HUbUDbwRN31hx3I0TUWAtyWrGtLa6FKWekq3bSuID_fQuPR-cyl3Zq7kScOE8vXfJDEuiNpPD4Ia6JdKg-2tV2hWirVcnhkkqcm4DUANOH6mUrLm0NcksyL48klJlsBBolS7ApB6CY_jxh7DoDip16_J-mi7lufG3o7n2tg0wEebVIFBl0yYkO2XbK5PTNnAyQesVX3doxAikYeSg_2zoJf0u1ggjXklX6IX6IskiGESQA33"
+              />
+            </div>
+          </div>
+        </div>
+      </header>
+      <!-- Dashboard Content - Bento Grid -->
+      <main class="flex-1 p-margin-mobile md:p-margin-desktop overflow-y-auto">
+        <div class="max-w-[1400px] mx-auto flex flex-col gap-6">
+          <!-- Header Section -->
+          <div
+            class="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-4 mb-2"
+          >
+            <div>
+              <h1
+                class="text-headline-xl font-headline-xl text-on-surface tracking-tight mb-2"
+              >
+                Hello Tech,
+              </h1>
+              <p
+                class="text-primary text-body-lg font-body-lg font-medium opacity-80"
+              >
+                Here's what's happening with your store today.
+              </p>
+            </div>
+            <div
+              class="flex flex-col sm:flex-row items-center gap-4 bg-surface-container-lowest p-2 rounded-2xl border border-outline-variant shadow-sm"
+            >
+              <div class="px-4 py-2 flex items-center gap-2">
+                <span
+                  class="material-symbols-outlined text-primary"
+                  data-icon="info"
+                  >info</span
+                >
+                <span class="text-label-md font-label-md"
+                  >Trial expires in 6 days.</span
+                >
+              </div>
+              <button
+                class="bg-primary text-on-primary px-6 py-2 rounded-xl text-label-md font-label-md hover:shadow-md transition-all flex items-center gap-2 whitespace-nowrap"
+              >
+                <span
+                  class="material-symbols-outlined text-[18px]"
+                  data-icon="workspace_premium"
+                  >workspace_premium</span
+                >
+                Upgrade Plan (30% Off)
+              </button>
+            </div>
+          </div>
+          <!-- Bento Grid Container -->
+          <div
+            class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-12 gap-6 auto-rows-[minmax(140px,auto)]"
+          >
+            <!-- Top Row: 4 Key Metrics (Span 3 cols each) -->
+            <div
+              class="xl:col-span-3 bg-surface-container-lowest border border-outline-variant rounded-3xl p-6 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow"
+            >
+              <div class="flex items-center gap-2 text-on-surface-variant mb-4">
+                <span
+                  class="material-symbols-outlined text-[20px] bg-primary-fixed/30 p-2 rounded-xl text-primary"
+                  data-icon="account_balance_wallet"
+                  >account_balance_wallet</span
+                >
+                <span
+                  class="text-label-md font-label-md uppercase tracking-wider font-semibold"
+                  >Total Sales</span
+                >
+              </div>
+              <div
+                class="text-[32px] leading-tight font-bold font-mono text-on-surface"
+              >
+                ₦0.00
+              </div>
+              <div
+                class="text-label-sm text-on-surface-variant mt-2 flex items-center gap-1"
+              >
+                <span
+                  class="material-symbols-outlined text-[14px] text-green-500"
+                  data-icon="trending_up"
+                  >trending_up</span
+                >
+                0% vs last month
+              </div>
+            </div>
+            <div
+              class="xl:col-span-3 bg-surface-container-lowest border border-outline-variant rounded-3xl p-6 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow"
+            >
+              <div class="flex items-center gap-2 text-on-surface-variant mb-4">
+                <span
+                  class="material-symbols-outlined text-[20px] bg-secondary-fixed/30 p-2 rounded-xl text-secondary"
+                  data-icon="trending_up"
+                  >trending_up</span
+                >
+                <span
+                  class="text-label-md font-label-md uppercase tracking-wider font-semibold"
+                  >Total Settled</span
+                >
+              </div>
+              <div
+                class="text-[32px] leading-tight font-bold font-mono text-on-surface"
+              >
+                ₦0.00
+              </div>
+              <div class="text-label-sm text-on-surface-variant mt-2">
+                Ready for payout
+              </div>
+            </div>
+            <div
+              class="xl:col-span-3 bg-surface-container-lowest border border-outline-variant rounded-3xl p-6 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow"
+            >
+              <div class="flex items-center gap-2 text-on-surface-variant mb-4">
+                <span
+                  class="material-symbols-outlined text-[20px] bg-error-container/50 p-2 rounded-xl text-error"
+                  data-icon="hourglass_empty"
+                  >hourglass_empty</span
+                >
+                <span
+                  class="text-label-md font-label-md uppercase tracking-wider font-semibold"
+                  >Total Owed</span
+                >
+              </div>
+              <div
+                class="text-[32px] leading-tight font-bold font-mono text-on-surface"
+              >
+                ₦0.00
+              </div>
+              <div class="text-label-sm text-on-surface-variant mt-2">
+                Pending collection
+              </div>
+            </div>
+            <div
+              class="xl:col-span-3 bg-surface-container-lowest border border-outline-variant rounded-3xl p-6 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow"
+            >
+              <div class="flex items-center gap-2 text-on-surface-variant mb-4">
+                <span
+                  class="material-symbols-outlined text-[20px] bg-surface-variant p-2 rounded-xl text-tertiary"
+                  data-icon="storefront"
+                  >storefront</span
+                >
+                <span
+                  class="text-label-md font-label-md uppercase tracking-wider font-semibold"
+                  >Offline Sales</span
+                >
+              </div>
+              <div
+                class="text-[32px] leading-tight font-bold font-mono text-on-surface"
+              >
+                ₦0.00
+              </div>
+              <div class="text-label-sm text-on-surface-variant mt-2">
+                POS transactions
+              </div>
+            </div>
+            <!-- Middle Row: Chart (Span 6), Onboarding (Span 3), Small Metrics Grid (Span 3) -->
+            <!-- Main Chart -->
+            <div
+              class="xl:col-span-6 xl:row-span-2 bg-surface-container-lowest border border-outline-variant rounded-3xl p-6 shadow-sm flex flex-col"
+            >
+              <div class="flex justify-between items-center mb-6">
+                <div>
+                  <h3
+                    class="text-headline-sm font-headline-sm text-on-surface font-semibold"
+                  >
+                    Sales Overview
+                  </h3>
+                  <p class="text-label-sm text-on-surface-variant">
+                    Business report is ready.
+                  </p>
+                </div>
+                <div class="flex items-center gap-2">
+                  <button
+                    class="p-2 text-on-surface-variant hover:bg-surface-container-low rounded-xl border border-outline-variant transition-colors"
+                  >
+                    <span
+                      class="material-symbols-outlined text-[20px]"
+                      data-icon="download"
+                      >download</span
+                    >
+                  </button>
+                  <select
+                    class="text-label-sm font-label-md border-outline-variant rounded-xl bg-surface text-on-surface py-2 pl-3 pr-8 focus:ring-primary focus:border-primary"
+                  >
+                    <option>This Year</option>
+                  </select>
+                </div>
+              </div>
+              <div
+                class="flex-1 relative border-t border-b border-dashed border-outline-variant/60 flex flex-col justify-center items-center my-4 min-h-[240px]"
+              >
+                <!-- Chart Placeholder Content -->
+                <div
+                  class="bg-surface rounded-2xl p-6 shadow-sm border border-outline-variant/50 text-center max-w-sm z-10"
+                >
+                  <span
+                    class="material-symbols-outlined text-[40px] text-primary/40 mb-3"
+                    data-icon="monitoring"
+                    >monitoring</span
+                  >
+                  <h4
+                    class="text-headline-sm font-headline-sm text-on-surface mb-2"
+                  >
+                    No sales data yet
+                  </h4>
+                  <p
+                    class="text-body-sm font-body-sm text-on-surface-variant mb-4"
+                  >
+                    Record your first order to start visualizing your business
+                    growth.
+                  </p>
+                  <button
+                    class="bg-primary text-on-primary px-6 py-2.5 rounded-xl text-label-md font-label-md hover:bg-opacity-90 transition-all font-semibold shadow-sm"
+                  >
+                    Record Order
+                  </button>
+                </div>
+                <div
+                  class="absolute bottom-0 w-full flex justify-between text-label-sm text-on-surface-variant translate-y-full pt-3 px-2"
+                >
+                  <span class="">Jan</span><span class="">Feb</span
+                  ><span class="">Mar</span><span class="">Apr</span
+                  ><span class="">May</span><span class="">Jun</span
+                  ><span class="">Jul</span><span class="">Aug</span
+                  ><span class="">Sep</span><span class="">Oct</span
+                  ><span class="">Nov</span><span class="">Dec</span>
+                </div>
+              </div>
+              <div
+                class="flex justify-center items-center gap-6 mt-8 text-label-sm font-label-md text-on-surface-variant"
+              >
+                <div class="flex items-center gap-2">
+                  <span class="w-3 h-3 rounded-full bg-primary"></span> Online
+                  Sales
+                </div>
+                <div class="flex items-center gap-2">
+                  <span class="w-3 h-3 rounded-full bg-secondary"></span>
+                  Offline Sales
+                </div>
+              </div>
+            </div>
+            <!-- To-Do List integrated into grid -->
+            <div
+              class="xl:col-span-3 xl:row-span-2 bg-primary-fixed/20 border border-primary-fixed-dim/50 rounded-3xl p-6 shadow-sm flex flex-col"
+            >
+              <div class="flex justify-between items-center mb-6">
+                <h3
+                  class="text-headline-sm font-headline-sm text-on-surface font-semibold"
+                >
+                  Store Setup To-do
+                </h3>
+                <button
+                  class="text-primary text-label-sm font-label-md bg-surface p-1.5 rounded-lg shadow-sm hover:shadow transition-shadow"
+                >
+                  View All
+                </button>
+              </div>
+              <div class="space-y-3 flex-1 overflow-y-auto bento-scroll pr-1">
+                <a
+                  class="group flex gap-4 items-start p-4 rounded-2xl bg-surface border border-outline-variant/50 hover:border-primary/30 hover:shadow-md transition-all"
+                  href="#"
+                >
+                  <div
+                    class="w-10 h-10 rounded-full bg-primary-container/20 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-on-primary transition-colors shrink-0"
+                  >
+                    <span
+                      class="material-symbols-outlined text-[20px]"
+                      data-icon="description"
+                      >description</span
+                    >
+                  </div>
+                  <div>
+                    <h4
+                      class="text-label-md font-label-md text-on-surface mb-1 font-semibold group-hover:text-primary transition-colors"
+                    >
+                      Add Store Description
+                    </h4>
+                    <p
+                      class="text-label-sm text-on-surface-variant leading-tight"
+                    >
+                      Help visitors understand what you sell.
+                    </p>
+                  </div>
+                </a>
+                <a
+                  class="group flex gap-4 items-start p-4 rounded-2xl bg-surface border border-outline-variant/50 hover:border-primary/30 hover:shadow-md transition-all"
+                  href="#"
+                >
+                  <div
+                    class="w-10 h-10 rounded-full bg-primary-container/20 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-on-primary transition-colors shrink-0"
+                  >
+                    <span
+                      class="material-symbols-outlined text-[20px]"
+                      data-icon="image"
+                      >image</span
+                    >
+                  </div>
+                  <div>
+                    <h4
+                      class="text-label-md font-label-md text-on-surface mb-1 font-semibold group-hover:text-primary transition-colors"
+                    >
+                      Upload Store Image
+                    </h4>
+                    <p
+                      class="text-label-sm text-on-surface-variant leading-tight"
+                    >
+                      Make your store visually appealing.
+                    </p>
+                  </div>
+                </a>
+                <a
+                  class="group flex gap-4 items-start p-4 rounded-2xl bg-surface border border-outline-variant/50 hover:border-primary/30 hover:shadow-md transition-all"
+                  href="#"
+                >
+                  <div
+                    class="w-10 h-10 rounded-full bg-primary-container/20 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-on-primary transition-colors shrink-0"
+                  >
+                    <span
+                      class="material-symbols-outlined text-[20px]"
+                      data-icon="receipt_long"
+                      >receipt_long</span
+                    >
+                  </div>
+                  <div>
+                    <h4
+                      class="text-label-md font-label-md text-on-surface mb-1 font-semibold group-hover:text-primary transition-colors"
+                    >
+                      Record First Order
+                    </h4>
+                    <p
+                      class="text-label-sm text-on-surface-variant leading-tight"
+                    >
+                      Start tracking your business sales.
+                    </p>
+                  </div>
+                </a>
+              </div>
+            </div>
+            <!-- Small Metrics Grid & Onboarding Stacked -->
+            <div class="xl:col-span-3 xl:row-span-2 flex flex-col gap-6">
+              <!-- Onboarding Widget -->
+              <div
+                class="bg-surface-container-lowest rounded-3xl p-6 border border-outline-variant shadow-sm flex-1 flex flex-col justify-center relative overflow-hidden group hover:border-primary/30 transition-colors"
+              >
+                <div
+                  class="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-bl-full -mr-10 -mt-10 transition-transform group-hover:scale-110"
+                ></div>
+                <div class="relative z-10">
+                  <div
+                    class="w-12 h-12 bg-primary text-on-primary rounded-2xl flex items-center justify-center mb-4 shadow-md"
+                  >
+                    <span
+                      class="material-symbols-outlined text-[24px]"
+                      data-icon="rocket_launch"
+                      >rocket_launch</span
+                    >
+                  </div>
+                  <h2
+                    class="text-headline-sm font-headline-sm text-on-surface mb-2 font-semibold"
+                  >
+                    Launch your website
+                  </h2>
+                  <p
+                    class="text-body-sm font-body-sm text-on-surface-variant mb-5"
+                  >
+                    Complete the final steps to activate your online presence.
+                  </p>
+                  <button
+                    class="w-full bg-primary text-on-primary py-3 rounded-xl text-label-md font-label-md hover:bg-opacity-90 transition-all font-semibold shadow-sm flex items-center justify-center gap-2"
+                  >
+                    <span
+                      class="material-symbols-outlined text-[18px]"
+                      data-icon="check_circle"
+                      >check_circle</span
+                    >
+                    Activate Website
+                  </button>
+                </div>
+              </div>
+              <!-- 2x2 Mini Metrics -->
+              <div class="grid grid-cols-2 gap-4 flex-1">
+                <div
+                  class="bg-surface-container-lowest border border-outline-variant rounded-2xl p-4 shadow-sm flex flex-col justify-center items-center text-center hover:bg-surface-container-low transition-colors cursor-pointer"
+                >
+                  <span
+                    class="material-symbols-outlined text-primary text-[24px] mb-2"
+                    data-icon="inbox"
+                    >inbox</span
+                  >
+                  <span class="text-headline-sm font-bold text-on-surface"
+                    >0</span
+                  >
+                  <span class="text-label-sm text-on-surface-variant mt-1"
+                    >Orders</span
+                  >
+                </div>
+                <div
+                  class="bg-surface-container-lowest border border-outline-variant rounded-2xl p-4 shadow-sm flex flex-col justify-center items-center text-center hover:bg-surface-container-low transition-colors cursor-pointer"
+                >
+                  <span
+                    class="material-symbols-outlined text-secondary text-[24px] mb-2"
+                    data-icon="sell"
+                    >sell</span
+                  >
+                  <span class="text-headline-sm font-bold text-on-surface"
+                    >0</span
+                  >
+                  <span class="text-label-sm text-on-surface-variant mt-1"
+                    >Products Sold</span
+                  >
+                </div>
+                <div
+                  class="bg-surface-container-lowest border border-outline-variant rounded-2xl p-4 shadow-sm flex flex-col justify-center items-center text-center hover:bg-surface-container-low transition-colors cursor-pointer"
+                >
+                  <span
+                    class="material-symbols-outlined text-orange-500 text-[24px] mb-2"
+                    data-icon="person_add"
+                    >person_add</span
+                  >
+                  <span class="text-headline-sm font-bold text-on-surface"
+                    >0</span
+                  >
+                  <span class="text-label-sm text-on-surface-variant mt-1"
+                    >Customers</span
+                  >
+                </div>
+                <div
+                  class="bg-surface-container-lowest border border-outline-variant rounded-2xl p-4 shadow-sm flex flex-col justify-center items-center text-center hover:bg-surface-container-low transition-colors cursor-pointer"
+                >
+                  <span
+                    class="material-symbols-outlined text-error text-[24px] mb-2"
+                    data-icon="public"
+                    >public</span
+                  >
+                  <span class="text-headline-sm font-bold text-on-surface"
+                    >0</span
+                  >
+                  <span class="text-label-sm text-on-surface-variant mt-1"
+                    >Visits</span
+                  >
+                </div>
+              </div>
+            </div>
+            <!-- Bottom Row: Recent Orders (Span 6), Quick Actions (Span 3), Refer & Earn (Span 3) -->
+            <!-- Recent Orders -->
+            <div
+              class="xl:col-span-6 xl:row-span-2 bg-surface-container-lowest border border-outline-variant rounded-3xl shadow-sm flex flex-col overflow-hidden"
+            >
+              <div
+                class="p-6 border-b border-outline-variant/60 flex justify-between items-center bg-surface/50"
+              >
+                <h3
+                  class="text-headline-sm font-headline-sm text-on-surface font-semibold"
+                >
+                  Recent Orders
+                </h3>
+                <button
+                  class="text-primary text-label-md font-label-md hover:underline font-medium"
+                >
+                  View Full List
+                </button>
+              </div>
+              <div class="flex-1 w-full overflow-x-auto">
+                <table class="w-full text-left border-collapse min-w-[600px]">
+                  <thead>
+                    <tr
+                      class="text-label-sm font-label-md text-on-surface-variant border-b border-outline-variant/30"
+                    >
+                      <th
+                        class="py-4 px-6 font-semibold uppercase tracking-wider"
+                      >
+                        Order Details
+                      </th>
+                      <th
+                        class="py-4 px-6 font-semibold uppercase tracking-wider"
+                      >
+                        Amount
+                      </th>
+                      <th
+                        class="py-4 px-6 font-semibold uppercase tracking-wider"
+                      >
+                        Status
+                      </th>
+                      <th
+                        class="py-4 px-6 font-semibold uppercase tracking-wider"
+                      >
+                        Date
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <!-- Empty State -->
+                    <tr>
+                      <td class="py-20 text-center" colspan="4">
+                        <div
+                          class="flex flex-col items-center justify-center text-on-surface-variant max-w-sm mx-auto"
+                        >
+                          <div
+                            class="w-16 h-16 bg-surface-container rounded-full flex items-center justify-center mb-4"
+                          >
+                            <span
+                              class="material-symbols-outlined text-[32px] text-outline-variant"
+                              data-icon="inventory_2"
+                              >inventory_2</span
+                            >
+                          </div>
+                          <p
+                            class="text-body-md font-body-md font-medium text-on-surface mb-2"
+                          >
+                            No orders recorded yet
+                          </p>
+                          <p class="text-label-sm text-center">
+                            When you make sales, they will appear here for easy
+                            tracking and fulfillment.
+                          </p>
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <!-- Quick Actions -->
+            <div
+              class="xl:col-span-3 xl:row-span-2 bg-surface-container-lowest border border-outline-variant rounded-3xl p-6 shadow-sm flex flex-col"
+            >
+              <h3
+                class="text-headline-sm font-headline-sm text-on-surface font-semibold mb-6"
+              >
+                Quick Actions
+              </h3>
+              <div class="grid grid-cols-1 gap-3 flex-1 auto-rows-max">
+                <button
+                  class="group flex items-center gap-4 p-4 rounded-2xl bg-surface border border-outline-variant/50 hover:border-primary hover:shadow-md transition-all text-left"
+                >
+                  <div
+                    class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform"
+                  >
+                    <span
+                      class="material-symbols-outlined text-[20px]"
+                      data-icon="add_circle"
+                      >add_circle</span
+                    >
+                  </div>
+                  <div>
+                    <div
+                      class="text-label-md font-label-md text-on-surface font-semibold"
+                    >
+                      Create New Order
+                    </div>
+                    <div class="text-label-sm text-on-surface-variant">
+                      Manually record a sale
+                    </div>
+                  </div>
+                </button>
+                <button
+                  class="group flex items-center gap-4 p-4 rounded-2xl bg-surface border border-outline-variant/50 hover:border-primary hover:shadow-md transition-all text-left"
+                >
+                  <div
+                    class="w-10 h-10 rounded-full bg-secondary/10 flex items-center justify-center text-secondary group-hover:scale-110 transition-transform"
+                  >
+                    <span
+                      class="material-symbols-outlined text-[20px]"
+                      data-icon="library_add"
+                      >library_add</span
+                    >
+                  </div>
+                  <div>
+                    <div
+                      class="text-label-md font-label-md text-on-surface font-semibold"
+                    >
+                      Add New Product
+                    </div>
+                    <div class="text-label-sm text-on-surface-variant">
+                      Expand your inventory
+                    </div>
+                  </div>
+                </button>
+                <button
+                  class="group flex items-center gap-4 p-4 rounded-2xl bg-surface border border-outline-variant/50 hover:border-primary hover:shadow-md transition-all text-left"
+                >
+                  <div
+                    class="w-10 h-10 rounded-full bg-orange-500/10 flex items-center justify-center text-orange-600 group-hover:scale-110 transition-transform"
+                  >
+                    <span
+                      class="material-symbols-outlined text-[20px]"
+                      data-icon="campaign"
+                      >campaign</span
+                    >
+                  </div>
+                  <div>
+                    <div
+                      class="text-label-md font-label-md text-on-surface font-semibold"
+                    >
+                      Run Sales Promo
+                    </div>
+                    <div class="text-label-sm text-on-surface-variant">
+                      Create a discount code
+                    </div>
+                  </div>
+                </button>
+                <button
+                  class="group flex items-center gap-4 p-4 rounded-2xl bg-surface border border-outline-variant/50 hover:border-primary hover:shadow-md transition-all text-left"
+                >
+                  <div
+                    class="w-10 h-10 rounded-full bg-tertiary/10 flex items-center justify-center text-tertiary group-hover:scale-110 transition-transform"
+                  >
+                    <span
+                      class="material-symbols-outlined text-[20px]"
+                      data-icon="smart_toy"
+                      >smart_toy</span
+                    >
+                  </div>
+                  <div>
+                    <div
+                      class="text-label-md font-label-md text-on-surface font-semibold"
+                    >
+                      Ask Assistant
+                    </div>
+                    <div class="text-label-sm text-on-surface-variant">
+                      Get help with your store
+                    </div>
+                  </div>
+                </button>
+              </div>
+            </div>
+            <!-- Refer & Earn & Top Channel -->
+            <div class="xl:col-span-3 xl:row-span-2 flex flex-col gap-6">
+              <!-- Refer & Earn Block -->
+              <div
+                class="bg-gradient-to-br from-[#006039] to-[#004d2e] rounded-3xl p-6 text-white shadow-md flex-1 flex flex-col relative overflow-hidden group"
+              >
+                <div
+                  class="absolute -right-6 -top-6 w-32 h-32 bg-white/10 rounded-full blur-2xl group-hover:bg-white/20 transition-all"
+                ></div>
+                <div class="relative z-10 flex flex-col h-full">
+                  <div class="flex justify-between items-start mb-4">
+                    <div>
+                      <h3
+                        class="text-headline-sm font-headline-sm font-bold mb-1"
+                      >
+                        Refer &amp; Earn
+                      </h3>
+                      <p
+                        class="text-label-sm opacity-90 leading-relaxed max-w-[200px]"
+                      >
+                        Help others discover us &amp; earn rewards!
+                      </p>
+                    </div>
+                    <span
+                      class="material-symbols-outlined text-[32px] text-green-300"
+                      data-icon="redeem"
+                      >redeem</span
+                    >
+                  </div>
+                  <div
+                    class="mt-auto bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-white/20"
+                  >
+                    <div
+                      class="text-[10px] uppercase tracking-wider opacity-80 mb-1"
+                    >
+                      Your Code
+                    </div>
+                    <div class="flex items-center justify-between">
+                      <span
+                        class="text-label-md font-label-md font-bold text-white tracking-widest"
+                        >TECHMARSHA</span
+                      >
+                      <button
+                        class="p-1.5 bg-white/20 hover:bg-white/30 rounded-lg transition-colors"
+                      >
+                        <span
+                          class="material-symbols-outlined text-[16px]"
+                          data-icon="content_copy"
+                          >content_copy</span
+                        >
+                      </button>
+                    </div>
+                  </div>
+                  <button
+                    class="w-full bg-white text-[#006039] py-3 rounded-xl text-label-md font-label-md font-bold hover:bg-opacity-90 transition-all mt-4 shadow-sm"
+                  >
+                    View Earnings
+                  </button>
+                </div>
+              </div>
+              <!-- Top Sales Channel Mini -->
+              <div
+                class="bg-surface-container-lowest border border-outline-variant rounded-3xl p-6 shadow-sm flex-1 flex flex-col items-center justify-center text-center"
+              >
+                <h3
+                  class="text-label-md font-label-md text-on-surface font-semibold mb-3 self-start w-full text-left"
+                >
+                  Top Sales Channel
+                </h3>
+                <div
+                  class="w-12 h-12 rounded-full bg-surface-variant flex items-center justify-center text-on-surface-variant mb-3"
+                >
+                  <span class="material-symbols-outlined" data-icon="bar_chart"
+                    >bar_chart</span
+                  >
+                </div>
+                <p
+                  class="text-label-sm font-label-sm text-on-surface-variant mb-3"
+                >
+                  Not enough data to determine top channels.
+                </p>
+                <button
+                  class="text-primary text-label-sm font-label-md font-semibold hover:underline"
+                >
+                  View Analytics
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+    <!-- Floating Action Button (Chat) -->
+    <button
+      class="fixed bottom-6 right-6 bg-[#006039] text-white px-5 py-3 rounded-full shadow-xl flex items-center gap-2 hover:bg-opacity-90 hover:scale-105 transition-all z-50"
+    >
+      <span class="material-symbols-outlined text-[20px]" data-icon="chat"
+        >chat</span
+      >
+      <span class="text-label-md font-label-md font-medium">Chat Now!</span>
+    </button>
+  </body>
+</html>
