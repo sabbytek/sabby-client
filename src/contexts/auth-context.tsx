@@ -20,10 +20,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Initialize auth state from localStorage on mount
+  // Initialize auth state from localStorage on mount. This must run in an
+  // effect (not a useState initializer) so server and client first renders match.
   useEffect(() => {
     const storedUser = getCurrentUser();
     if (storedUser) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setUser(storedUser);
     }
     setIsLoading(false);

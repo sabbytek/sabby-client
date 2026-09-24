@@ -12,7 +12,7 @@ type RequestApiOptions = {
 function normalizeApiError(responseStatus: number, body: unknown): ApiError {
   const b = body as Record<string, unknown> | undefined;
   return {
-    message: b?.message ?? "Request failed",
+    message: String(b?.message ?? "Request failed"),
     status: responseStatus,
     code: String(b?.code ?? "ERR_REQUEST_FAILED"),
     details: body,

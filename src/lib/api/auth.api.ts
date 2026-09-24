@@ -1,14 +1,14 @@
 import { request } from "@/lib/api/_transport";
-import type { AuthResponse, LoginRequest } from "@/lib/api/auth.types";
+import type { AuthResponse, LoginRequest, User } from "@/lib/api/auth.types";
 
 // Mock user data for development
-const MOCK_USER = {
+const MOCK_USER: User = {
   id: "user_123",
   email: "merchant@sabyy.app",
   name: "Femi Adeleke",
   merchant_id: "merchant_456",
   merchant_name: "Fashion Hub NG",
-  role: "admin" as const,
+  role: "admin",
   permissions: ["orders:read", "orders:write", "inventory:read", "inventory:write", "customers:read", "finance:read"],
   avatar: undefined,
 };
@@ -48,7 +48,7 @@ export async function logoutUser(refreshToken: string): Promise<void> {
 }
 
 // Get current user from stored tokens (mock)
-export function getCurrentUser(): typeof MOCK_USER | null {
+export function getCurrentUser(): User | null {
   if (typeof window === "undefined") return null;
 
   const userStr = localStorage.getItem("sabyy_user");
@@ -62,7 +62,7 @@ export function getCurrentUser(): typeof MOCK_USER | null {
 }
 
 // Store tokens
-export function storeTokens(accessToken: string, refreshToken: string, user: typeof MOCK_USER): void {
+export function storeTokens(accessToken: string, refreshToken: string, user: User): void {
   if (typeof window === "undefined") return;
 
   localStorage.setItem("sabyy_access_token", accessToken);
