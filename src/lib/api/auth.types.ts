@@ -1,4 +1,9 @@
+// Mirrors SabbyPOS src/modules/auth (validators.ts, service.ts, controller.ts).
+
+export type UserRole = "owner" | "manager" | "staff" | "viewer";
+
 export type LoginRequest = {
+  tenantSlug: string;
   email: string;
   password: string;
 };
@@ -6,21 +11,25 @@ export type LoginRequest = {
 export type User = {
   id: string;
   email: string;
-  name: string;
-  merchant_id: string;
-  merchant_name: string;
-  role: "admin" | "manager" | "staff";
-  permissions: string[];
-  avatar?: string;
+  firstName: string;
+  lastName: string;
+  role: UserRole;
 };
 
-export type AuthResponse = {
+export type LoginResponse = {
+  accessToken: string;
+  refreshToken: string;
   user: User;
-  access_token: string;
-  refresh_token: string;
-  expires_in: number;
 };
 
-export type LogoutRequest = {
-  refresh_token: string;
+export type RefreshResponse = {
+  accessToken: string;
+};
+
+/** GET /v1/auth/me — claims from the access token, not the full profile. */
+export type MeResponse = {
+  userId: string;
+  tenantId: string;
+  email: string;
+  role: UserRole;
 };

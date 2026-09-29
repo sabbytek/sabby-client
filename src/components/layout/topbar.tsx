@@ -7,7 +7,7 @@ import { useState } from "react";
 import { MapPin, Bell } from "lucide-react";
 
 export function Topbar() {
-  const { user, logout } = useAuth();
+  const { user, tenantSlug, logout } = useAuth();
   const router = useRouter();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -21,7 +21,7 @@ export function Topbar() {
       {/* Left Section */}
       <div className="flex items-center gap-1.5 text-on-surface-variant text-sm">
         <MapPin size={16} />
-        <span>{user?.merchant_name || "Headquarters"}</span>
+        <span>{tenantSlug || "Headquarters"}</span>
       </div>
 
       {/* Right Section */}
@@ -53,18 +53,9 @@ export function Topbar() {
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               className="w-8 h-8 rounded-full bg-surface-container-low ml-1 flex items-center justify-center overflow-hidden cursor-pointer border border-outline-variant/60"
             >
-              {user?.avatar ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  alt={user.name}
-                  className="w-full h-full object-cover"
-                  src={user.avatar}
-                />
-              ) : (
-                <span className="text-on-surface-variant text-xs font-medium">
-                  {user?.name?.charAt(0) || "U"}
-                </span>
-              )}
+              <span className="text-on-surface-variant text-xs font-medium">
+                {user?.firstName?.charAt(0).toUpperCase() || "U"}
+              </span>
             </button>
 
             {/* Dropdown Menu */}

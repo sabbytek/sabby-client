@@ -92,8 +92,8 @@ const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "
 
 export default function DashboardPage() {
   const { user } = useAuth();
-  const firstName = user?.name?.split(" ")[0] || "there";
-  const referralCode = (user?.name || "SABYY").replace(/\s+/g, "").slice(0, 10).toUpperCase();
+  const firstName = user?.firstName || "there";
+  const referralCode = (user ? `${user.firstName}${user.lastName}` : "SABYY").replace(/\s+/g, "").slice(0, 10).toUpperCase();
   const completedTodos = 0;
 
   return (

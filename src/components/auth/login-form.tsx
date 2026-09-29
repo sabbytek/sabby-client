@@ -1,15 +1,23 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useAuth } from "@/contexts/auth-context";
+import { isMockMode } from "@/lib/api/_transport";
+import { getLastTenantSlug } from "@/lib/api/session";
 
 const loginSchema = z.object({
+  tenantSlug: z
+    .string()
+    .trim()
+    .toLowerCase()
+    .min(2, "Enter your business handle")
+    .regex(/^[a-z0-9-]+$/, "Use lowercase letters, numbers and hyphens only"),
   email: z.string().email("Invalid email address"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
+  password: z.string().min(8, "Password must be at least 8 characters"),
 });
 
 type LoginFormData = z.infer<typeof loginSchema>;
@@ -22,16 +30,23 @@ export function LoginForm() {
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors },
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
   });
 
+  // Prefill the business handle used last time on this device.
+  useEffect(() => {
+    const lastSlug = getLastTenantSlug();
+    if (lastSlug) setValue("tenantSlug", lastSlug);
+  }, [setValue]);
+
   const onSubmit = async (data: LoginFormData) => {
     setLocalError(null);
 
     try {
-      await login(data.email, data.password);
+      await login(data.tenantSlug, data.email, data.password);
       router.push("/dashboard");
     } catch (err) {
       const message = err instanceof Error ? err.message : "Login failed";
@@ -52,6 +67,27 @@ export function LoginForm() {
         )}
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          {/* Business handle */}
+          <div>
+            <label htmlFor="tenantSlug" className="block text-sm font-medium text-foreground mb-2">
+              Business Handle
+            </label>
+            <input
+              id="tenantSlug"
+              type="text"
+              autoComplete="organization"
+              autoCapitalize="none"
+              spellCheck={false}
+              {...register("tenantSlug")}
+              placeholder="fashion-hub"
+              className="w-full px-4 py-2 border border-border rounded-md bg-background text-foreground placeholder:text-secondary focus:outline-none focus:border-accent"
+              disabled={isLoading}
+            />
+            {errors.tenantSlug && (
+              <p className="mt-1 text-sm text-danger">{errors.tenantSlug.message}</p>
+            )}
+          </div>
+
           {/* Email */}
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-foreground mb-2">
@@ -99,11 +135,14 @@ export function LoginForm() {
         </form>
 
         {/* Demo Info */}
-        <div className="mt-8 p-4 bg-accent-light rounded-md border border-accent-soft">
-          <p className="text-sm text-foreground font-medium mb-2">Demo Credentials:</p>
-          <p className="text-xs text-secondary">Email: merchant@sabyy.app</p>
-          <p className="text-xs text-secondary">Password: anything (mock)</p>
-        </div>
+        {isMockMode && (
+          <div className="mt-8 p-4 bg-accent-light rounded-md border border-accent-soft">
+            <p className="text-sm text-foreground font-medium mb-2">Demo Credentials:</p>
+            <p className="text-xs text-secondary">Handle: any (e.g. fashion-hub)</p>
+            <p className="text-xs text-secondary">Email: merchant@sabyy.app</p>
+            <p className="text-xs text-secondary">Password: any 8+ characters (mock)</p>
+          </div>
+        )}
       </div>
     </div>
   );
