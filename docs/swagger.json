@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "BPOS API",
-    "description": "Multi-tenant commerce and operations platform for Nigerian SMEs",
+    "description": "Multi-tenant commerce and operations platform for Nigerian SMEs.\n\n## Authentication\nEach business is a tenant, identified by its handle (`slug`). A user account belongs to one tenant.\n\n1. `POST /v1/auth/login` with `{ tenantSlug, email, password }` returns `accessToken`, `refreshToken` and `user`.\n2. Send `Authorization: Bearer <accessToken>` on every protected request. The token carries the tenant, so no tenant header is needed.\n3. When a request returns `401`, call `POST /v1/auth/refresh` with `{ tenantSlug, refreshToken }`. It returns a new `accessToken` only; the refresh token is reused until it expires (7 days) or is revoked.\n4. `POST /v1/auth/logout` with `{ refreshToken }` revokes it.\n\nAccess tokens last 15 minutes by default (`JWT_ACCESS_EXPIRY`). Request bodies reject unknown keys and use camelCase.\n\n## Responses\nSuccess: `{ \"success\": true, \"data\": ... }`\n\nFailure: `{ \"success\": false, \"error\": { \"code\", \"message\", \"details\"? } }`. Common codes: `VALIDATION_ERROR` (400, `details` lists the fields), `UNAUTHORIZED` (401), `FORBIDDEN` (403), `FEATURE_GATED` (402), `NOT_FOUND` (404), `CONFLICT` (409), `RATE_LIMIT_EXCEEDED` (429), `INTERNAL_ERROR` (500), `EXTERNAL_SERVICE_ERROR` (502, a payment or logistics provider failed).\n\nA path that does not exist returns Fastify's own shape instead: `{ \"message\", \"error\", \"statusCode\" }`.\n\n## Pagination\nMerchant list endpoints (orders, products, customers, inventory, expenses, ledger) take `page` and `limit` query parameters and return\n`data: { items, total, page, limit, totalPages }`.\nPlatform (admin) list endpoints nest the counts instead: `data: { items, pagination: { page, limit, total, totalPages } }`.\n\n## Money\nAmounts are integers in kobo (₦1 = 100 kobo).",
     "version": "1.0.0",
     "contact": {
       "name": "BPOS Engineering"
@@ -16,9 +16,7 @@
         "bearerFormat": "JWT"
       }
     },
-    "schemas": {
-
-    }
+    "schemas": {}
   },
   "paths": {
     "/v1/auth/login": {
@@ -27,6 +25,7 @@
         "tags": [
           "Auth"
         ],
+        "description": "Accounts are scoped to a business: the same email under another `tenantSlug` is a different account. Wrong email, wrong password, or credentials from another business all return the same 401. An unknown `tenantSlug` returns 404. Rate limited: 10 requests per minute.",
         "requestBody": {
           "required": true,
           "content": {
@@ -35,7 +34,8 @@
                 "type": "object",
                 "properties": {
                   "tenantSlug": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "The business handle chosen at signup (tenant `slug`), e.g. `fashion-hub`"
                   },
                   "email": {
                     "type": "string",
@@ -57,9 +57,245 @@
             }
           }
         },
+        "security": [],
         "responses": {
           "200": {
-            "description": "Default Response"
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        true
+                      ]
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "accessToken": {
+                          "type": "string",
+                          "description": "JWT for `Authorization: Bearer`. Short-lived (JWT_ACCESS_EXPIRY, 15m by default)"
+                        },
+                        "refreshToken": {
+                          "type": "string",
+                          "description": "Opaque token for /v1/auth/refresh and /v1/auth/logout. Valid 7 days; not rotated on refresh"
+                        },
+                        "user": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string",
+                              "format": "uuid",
+                              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                            },
+                            "email": {
+                              "type": "string"
+                            },
+                            "firstName": {
+                              "type": "string"
+                            },
+                            "lastName": {
+                              "type": "string"
+                            },
+                            "role": {
+                              "type": "string",
+                              "enum": [
+                                "owner",
+                                "manager",
+                                "staff",
+                                "viewer"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "id",
+                            "email",
+                            "firstName",
+                            "lastName",
+                            "role"
+                          ],
+                          "additionalProperties": false
+                        }
+                      },
+                      "required": [
+                        "accessToken",
+                        "refreshToken",
+                        "user"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "data"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        false
+                      ]
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "details": {}
+                      },
+                      "required": [
+                        "code",
+                        "message"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        false
+                      ]
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "details": {}
+                      },
+                      "required": [
+                        "code",
+                        "message"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        false
+                      ]
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "details": {}
+                      },
+                      "required": [
+                        "code",
+                        "message"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        false
+                      ]
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "details": {}
+                      },
+                      "required": [
+                        "code",
+                        "message"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
           }
         }
       }
@@ -70,6 +306,7 @@
         "tags": [
           "Auth"
         ],
+        "description": "Call when an authenticated request returns 401. Returns only a new `accessToken`; keep using the same `refreshToken` until it expires (7 days) or is revoked by logout. Rate limited: 20 requests per minute.",
         "requestBody": {
           "required": true,
           "content": {
@@ -78,10 +315,12 @@
                 "type": "object",
                 "properties": {
                   "tenantSlug": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "The business handle chosen at signup (tenant `slug`), e.g. `fashion-hub`"
                   },
                   "refreshToken": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "Refresh token returned by /v1/auth/login"
                   }
                 },
                 "required": [
@@ -93,9 +332,203 @@
             }
           }
         },
+        "security": [],
         "responses": {
           "200": {
-            "description": "Default Response"
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        true
+                      ]
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "accessToken": {
+                          "type": "string",
+                          "description": "New access token. The refresh token stays the same"
+                        }
+                      },
+                      "required": [
+                        "accessToken"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "data"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        false
+                      ]
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "details": {}
+                      },
+                      "required": [
+                        "code",
+                        "message"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        false
+                      ]
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "details": {}
+                      },
+                      "required": [
+                        "code",
+                        "message"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        false
+                      ]
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "details": {}
+                      },
+                      "required": [
+                        "code",
+                        "message"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        false
+                      ]
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "details": {}
+                      },
+                      "required": [
+                        "code",
+                        "message"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
           }
         }
       }
@@ -106,6 +539,7 @@
         "tags": [
           "Auth"
         ],
+        "description": "After this, /v1/auth/refresh rejects the token with 401.",
         "requestBody": {
           "required": true,
           "content": {
@@ -132,7 +566,119 @@
         ],
         "responses": {
           "200": {
-            "description": "Default Response"
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        true
+                      ]
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "message"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "data"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        false
+                      ]
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "details": {}
+                      },
+                      "required": [
+                        "code",
+                        "message"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        false
+                      ]
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "details": {}
+                      },
+                      "required": [
+                        "code",
+                        "message"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
           }
         }
       }
@@ -143,6 +689,7 @@
         "tags": [
           "Auth"
         ],
+        "description": "Returns the claims in the access token, not the full profile: no name fields. Use the `user` object from login for display.",
         "security": [
           {
             "bearerAuth": []
@@ -150,7 +697,97 @@
         ],
         "responses": {
           "200": {
-            "description": "Default Response"
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        true
+                      ]
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "userId": {
+                          "type": "string"
+                        },
+                        "tenantId": {
+                          "type": "string"
+                        },
+                        "email": {
+                          "type": "string"
+                        },
+                        "role": {
+                          "type": "string",
+                          "enum": [
+                            "owner",
+                            "manager",
+                            "staff",
+                            "viewer"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "userId",
+                        "tenantId",
+                        "email",
+                        "role"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "data"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        false
+                      ]
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "details": {}
+                      },
+                      "required": [
+                        "code",
+                        "message"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
           }
         }
       }
@@ -170,7 +807,8 @@
                 "type": "object",
                 "properties": {
                   "tenantSlug": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "The business handle chosen at signup (tenant `slug`), e.g. `fashion-hub`"
                   },
                   "email": {
                     "type": "string",
@@ -190,7 +828,119 @@
         "security": [],
         "responses": {
           "200": {
-            "description": "Default Response"
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        true
+                      ]
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "message"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "data"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        false
+                      ]
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "details": {}
+                      },
+                      "required": [
+                        "code",
+                        "message"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        false
+                      ]
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "details": {}
+                      },
+                      "required": [
+                        "code",
+                        "message"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
           }
         }
       }
@@ -210,7 +960,8 @@
                 "type": "object",
                 "properties": {
                   "tenantSlug": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "The business handle chosen at signup (tenant `slug`), e.g. `fashion-hub`"
                   },
                   "token": {
                     "type": "string",
@@ -234,18 +985,130 @@
         "security": [],
         "responses": {
           "200": {
-            "description": "Default Response"
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        true
+                      ]
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "message"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "data"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        false
+                      ]
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "details": {}
+                      },
+                      "required": [
+                        "code",
+                        "message"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        false
+                      ]
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "details": {}
+                      },
+                      "required": [
+                        "code",
+                        "message"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
           }
         }
       }
     },
     "/v1/tenants/": {
       "post": {
-        "summary": "Provision a new merchant tenant",
+        "summary": "Provision a new merchant tenant (public signup)",
         "tags": [
           "Tenants"
         ],
-        "description": "Creates a new isolated tenant schema, seeds default data, and registers the owner account.",
+        "description": "Creates an isolated tenant schema, seeds default data, and registers the owner account. Rate limited to 3 per hour per IP.",
         "requestBody": {
           "required": true,
           "content": {
@@ -262,7 +1125,8 @@
                     "type": "string",
                     "minLength": 2,
                     "maxLength": 50,
-                    "pattern": "^[a-z0-9-]+$"
+                    "pattern": "^[a-z0-9-]+$",
+                    "description": "Business handle: lowercase letters, numbers, hyphens. Users log in with it as `tenantSlug`"
                   },
                   "businessEmail": {
                     "type": "string",
@@ -298,9 +1162,173 @@
             }
           }
         },
+        "security": [],
         "responses": {
-          "200": {
-            "description": "Default Response"
+          "201": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        true
+                      ]
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "tenantId": {
+                          "type": "string",
+                          "format": "uuid",
+                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                        },
+                        "slug": {
+                          "type": "string",
+                          "description": "Use as `tenantSlug` when logging in"
+                        },
+                        "message": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "tenantId",
+                        "slug",
+                        "message"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "data"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        false
+                      ]
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "details": {}
+                      },
+                      "required": [
+                        "code",
+                        "message"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        false
+                      ]
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "details": {}
+                      },
+                      "required": [
+                        "code",
+                        "message"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        false
+                      ]
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "details": {}
+                      },
+                      "required": [
+                        "code",
+                        "message"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
           }
         }
       }
@@ -718,8 +1746,7 @@
             },
             "in": "query",
             "name": "locationId",
-            "required": false,
-            "description": "Filter by location ID"
+            "required": false
           },
           {
             "schema": {
@@ -727,8 +1754,7 @@
             },
             "in": "query",
             "name": "variantId",
-            "required": false,
-            "description": "Filter by product variant ID"
+            "required": false
           }
         ],
         "security": [
@@ -757,21 +1783,17 @@
                 "type": "object",
                 "properties": {
                   "variantId": {
-                    "type": "string",
-                    "description": "Product variant ID"
+                    "type": "string"
                   },
                   "locationId": {
-                    "type": "string",
-                    "description": "Location ID to receive stock at"
+                    "type": "string"
                   },
                   "quantity": {
                     "type": "integer",
                     "minimum": 1,
-                    "maximum": 9007199254740991,
-                    "description": "Quantity to receive (must be positive)"
+                    "maximum": 9007199254740991
                   },
                   "note": {
-                    "description": "Optional note for audit trail",
                     "type": "string"
                   }
                 },
@@ -811,21 +1833,17 @@
                 "type": "object",
                 "properties": {
                   "variantId": {
-                    "type": "string",
-                    "description": "Product variant ID"
+                    "type": "string"
                   },
                   "locationId": {
-                    "type": "string",
-                    "description": "Location ID to adjust stock at"
+                    "type": "string"
                   },
                   "quantity": {
                     "type": "integer",
                     "minimum": -9007199254740991,
-                    "maximum": 9007199254740991,
-                    "description": "Adjustment quantity (positive = add, negative = remove)"
+                    "maximum": 9007199254740991
                   },
                   "note": {
-                    "description": "Reason for adjustment",
                     "type": "string"
                   }
                 },
@@ -864,8 +1882,7 @@
             },
             "in": "query",
             "name": "variantId",
-            "required": false,
-            "description": "Filter by product variant ID"
+            "required": false
           },
           {
             "schema": {
@@ -873,8 +1890,7 @@
             },
             "in": "query",
             "name": "from",
-            "required": false,
-            "description": "Start date (ISO 8601)"
+            "required": false
           },
           {
             "schema": {
@@ -882,8 +1898,7 @@
             },
             "in": "query",
             "name": "to",
-            "required": false,
-            "description": "End date (ISO 8601)"
+            "required": false
           },
           {
             "schema": {
@@ -891,8 +1906,7 @@
             },
             "in": "query",
             "name": "page",
-            "required": false,
-            "description": "Page number (default: 1)"
+            "required": false
           },
           {
             "schema": {
@@ -900,8 +1914,7 @@
             },
             "in": "query",
             "name": "limit",
-            "required": false,
-            "description": "Items per page (default: 20, max: 100)"
+            "required": false
           }
         ],
         "security": [
@@ -929,8 +1942,7 @@
             },
             "in": "query",
             "name": "locationId",
-            "required": false,
-            "description": "Filter by location ID"
+            "required": false
           }
         ],
         "security": [
@@ -941,272 +1953,6 @@
         "responses": {
           "200": {
             "description": "Default Response"
-          }
-        }
-      }
-    },
-    "/v1/inventory/availability": {
-      "get": {
-        "summary": "Check stock availability across all locations",
-        "tags": [
-          "Inventory"
-        ],
-        "description": "Returns stock levels at each branch so staff can see where to source from or transfer stock. Useful for multi-location businesses like pharmacy chains.",
-        "parameters": [
-          {
-            "schema": {
-              "type": "string"
-            },
-            "in": "query",
-            "name": "sku",
-            "required": false,
-            "description": "Product SKU to check availability for"
-          },
-          {
-            "schema": {
-              "type": "string"
-            },
-            "in": "query",
-            "name": "variantId",
-            "required": false,
-            "description": "Product variant ID to check availability for"
-          }
-        ],
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Default Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "enum": [true]
-                    },
-                    "data": {
-                      "type": "object",
-                      "properties": {
-                        "sku": {
-                          "nullable": true,
-                          "type": "string"
-                        },
-                        "variantId": {
-                          "nullable": true,
-                          "type": "string"
-                        },
-                        "variantName": {
-                          "nullable": true,
-                          "type": "string"
-                        },
-                        "totalStock": {
-                          "type": "number",
-                          "description": "Total stock across all locations"
-                        },
-                        "availableAt": {
-                          "type": "number",
-                          "description": "Number of locations with stock \u003E 0"
-                        },
-                        "locations": {
-                          "type": "array",
-                          "items": {
-                            "type": "object",
-                            "properties": {
-                              "locationId": {
-                                "type": "string"
-                              },
-                              "locationName": {
-                                "type": "string"
-                              },
-                              "quantityOnHand": {
-                                "type": "number"
-                              },
-                              "lowStockThreshold": {
-                                "type": "number"
-                              },
-                              "isLowStock": {
-                                "type": "boolean"
-                              }
-                            },
-                            "required": [
-                              "locationId",
-                              "locationName",
-                              "quantityOnHand",
-                              "lowStockThreshold",
-                              "isLowStock"
-                            ],
-                            "additionalProperties": false
-                          },
-                          "description": "Stock levels at each location"
-                        }
-                      },
-                      "required": [
-                        "sku",
-                        "variantId",
-                        "variantName",
-                        "totalStock",
-                        "availableAt",
-                        "locations"
-                      ],
-                      "additionalProperties": false
-                    }
-                  },
-                  "required": [
-                    "success",
-                    "data"
-                  ],
-                  "additionalProperties": false
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/v1/inventory/transfer": {
-      "post": {
-        "summary": "Transfer stock between locations",
-        "tags": [
-          "Inventory"
-        ],
-        "description": "Moves inventory from one branch to another within the same tenant. Creates audit trail with paired stock movements (OUT at source, IN at destination).",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "variantId": {
-                    "type": "string",
-                    "description": "Product variant ID to transfer"
-                  },
-                  "fromLocationId": {
-                    "type": "string",
-                    "description": "Source location ID"
-                  },
-                  "toLocationId": {
-                    "type": "string",
-                    "description": "Destination location ID"
-                  },
-                  "quantity": {
-                    "type": "integer",
-                    "minimum": 1,
-                    "maximum": 9007199254740991,
-                    "description": "Quantity to transfer (must be positive)"
-                  },
-                  "note": {
-                    "description": "Transfer note for audit trail",
-                    "type": "string"
-                  }
-                },
-                "required": [
-                  "variantId",
-                  "fromLocationId",
-                  "toLocationId",
-                  "quantity"
-                ],
-                "additionalProperties": false
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "responses": {
-          "201": {
-            "description": "Default Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "enum": [true]
-                    },
-                    "data": {
-                      "type": "object",
-                      "properties": {
-                        "transferId": {
-                          "type": "string",
-                          "description": "Unique transfer reference ID"
-                        },
-                        "variantId": {
-                          "type": "string"
-                        },
-                        "quantity": {
-                          "type": "number"
-                        },
-                        "from": {
-                          "type": "object",
-                          "properties": {
-                            "locationId": {
-                              "type": "string"
-                            },
-                            "locationName": {
-                              "type": "string"
-                            },
-                            "quantityOnHand": {
-                              "type": "number",
-                              "description": "Remaining stock after transfer"
-                            }
-                          },
-                          "required": [
-                            "locationId",
-                            "locationName",
-                            "quantityOnHand"
-                          ],
-                          "additionalProperties": false
-                        },
-                        "to": {
-                          "type": "object",
-                          "properties": {
-                            "locationId": {
-                              "type": "string"
-                            },
-                            "locationName": {
-                              "type": "string"
-                            },
-                            "quantityOnHand": {
-                              "type": "number",
-                              "description": "New stock level after transfer"
-                            }
-                          },
-                          "required": [
-                            "locationId",
-                            "locationName",
-                            "quantityOnHand"
-                          ],
-                          "additionalProperties": false
-                        }
-                      },
-                      "required": [
-                        "transferId",
-                        "variantId",
-                        "quantity",
-                        "from",
-                        "to"
-                      ],
-                      "additionalProperties": false
-                    }
-                  },
-                  "required": [
-                    "success",
-                    "data"
-                  ],
-                  "additionalProperties": false
-                }
-              }
-            }
           }
         }
       }
@@ -4025,11 +4771,76 @@
           }
         }
       }
+    },
+    "/v1/settings/audit": {
+      "get": {
+        "summary": "Your business activity trail",
+        "tags": [
+          "Settings"
+        ],
+        "description": "Who did what in your business, including any access by BPOS support staff and the reason they gave. Filter with actorType=platform to see only BPOS staff access.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "user",
+                "platform",
+                "system"
+              ]
+            },
+            "in": "query",
+            "name": "actorType",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            },
+            "in": "query",
+            "name": "action",
+            "required": false
+          },
+          {
+            "schema": {
+              "default": 1,
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 9007199254740991
+            },
+            "in": "query",
+            "name": "page",
+            "required": false
+          },
+          {
+            "schema": {
+              "default": 50,
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            },
+            "in": "query",
+            "name": "limit",
+            "required": false
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
     }
   },
   "servers": [
     {
-      "url": "http://localhost:3000",
+      "url": "http://localhost:5001",
       "description": "Development"
     }
   ],
@@ -4048,7 +4859,7 @@
     },
     {
       "name": "Inventory",
-      "description": "Stock tracking, movement, cross-branch availability, and inter-location transfers"
+      "description": "Stock tracking and movement"
     },
     {
       "name": "Customers",

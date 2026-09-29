@@ -1,29 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
+import { SESSION_COOKIE } from "@/lib/api/session";
 
+/**
+ * Coarse route guard for navigation only. The marker cookie just says a login
+ * happened in this browser; real authorization is the backend rejecting API
+ * calls without a valid bearer token (handled in the API transport).
+ */
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  const hasSession = request.cookies.has(SESSION_COOKIE);
 
-  // Public routes that don't require authentication
-  const publicRoutes = ["/", "/login", "/(auth)"];
-  const isPublicRoute = publicRoutes.some(route => {
-    if (route === "/") return pathname === "/";
-    return pathname.startsWith(route.replace("/(auth)", "/login"));
-  });
-
-  // Protected routes
-  const isProtectedRoute = pathname.startsWith("/dashboard");
-
-  // Get tokens from cookies
-  const accessToken = request.cookies.get("sabyy_access_token")?.value;
-  const userStr = request.cookies.get("sabyy_user")?.value;
-
-  // If accessing protected route without authentication, redirect to login
-  if (isProtectedRoute && !accessToken && !userStr) {
+  if (pathname.startsWith("/dashboard") && !hasSession) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
-  // If accessing login page while authenticated, redirect to dashboard
-  if (pathname === "/login" && accessToken && userStr) {
+  if (pathname === "/login" && hasSession) {
     return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 
@@ -31,13 +22,5 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     */
-    "/((?!_next/static|_next/image|favicon.ico).*)",
-  ],
+  matcher: ["/dashboard/:path*", "/login"],
 };

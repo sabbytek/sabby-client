@@ -25,7 +25,7 @@ These were settled deliberately. Do not revisit without a reason.
 | Framework | Next.js 15 (App Router) + TypeScript |
 | Repo shape | **Single app**, surfaces separated by route groups |
 | Rendering | **Client-first.** Pages are `"use client"`, data via TanStack Query |
-| Backend access | **BFF proxy only.** The browser never calls the backend directly |
+| Backend access | **BFF proxy only.** The browser never calls the backend directly. ⚠ Not built yet: the browser currently calls the API directly (see *API Integration Status*) |
 | Styling | Tailwind v4 + `design-system/tokens.css` |
 | Components | shadcn/ui (Radix primitives) |
 | Server state | TanStack Query v5 |
@@ -366,16 +366,14 @@ This is new compared to Perry (which has no multi-tenant storefront). Sabyy stor
 
 These were decided in conversation, no longer open:
 
-1. **Response envelope shape** — Backend dev will confirm by tomorrow against Swagger. Assume wrapper exists; if bare JSON, `ApiEnvelope<T>` is trivial to adjust.
-2. **Auth handshake** — JWT + refresh token, backend sets httpOnly cookie. Backend dev will confirm handshake details and rotation policy by tomorrow.
+1. **Response envelope shape** — ✓ Confirmed (2026-09-29): `{ success: true, data }` / `{ success: false, error: { code, message, details? } }`.
+2. **Auth handshake** — ✓ Confirmed (2026-09-29): tokens come back in the JSON body, the backend sets **no cookies**. Login takes `tenantSlug` + email + password. Refresh returns a new `accessToken` only; the refresh token is not rotated (7-day life, revoked by logout).
 3. **Tenant resolution** — **Subdomain: `{merchant-name}.sabyy.app`** ✓ Storefront routes via subdomain capture; dashboard is origin-agnostic.
 4. **Payment provider** — **Paystack Web** (redirect flow). Webhook handling for both Paystack and Flutterwave in the spec (spec includes both).
 5. **Encryption** — **None.** Plain JSON request/response, no `NEXT_PUBLIC_AES_KEY` or signature layer.
 
 **Still needed:**
-- Swagger response shape confirmation (envelope vs bare JSON).
-- Backend auth handshake details and token rotation policy.
-- API base URL for dev environment.
+- Production API base URL, and adding the dashboard's origin to the backend's `CORS_ORIGINS`.
 - Storefront domain strategy: is `sabyy.app` the platform tenant, or does each merchant own their domain?
 
 ---
@@ -400,13 +398,22 @@ If any of these come up during the build, flag them as backend Phase 2 scope rat
 
 ---
 
-## Next Step: Endpoint Testing
+## API Integration Status (2026-09-29)
 
-Test a couple of endpoints and share the response payloads:
-- `POST /v1/auth/login` — response body (especially the token and user shape)
-- `GET /v1/products/categories` — response body (especially pagination structure if paginated)
+Endpoint testing is done; the contract below was verified end to end against the running backend (login, `/me`, refresh, logout, a paginated list).
 
-This will finalize the `ApiEnvelope<T>` shape for `lib/api/types.ts` and `lib/api/_transport.ts` in Module 0.
+**Contract**
+- Base URL: `NEXT_PUBLIC_API_BASE_URL` (dev: `http://localhost:5001`), paths include `/v1`. Live docs: `<base>/docs`; a copy of the spec is in `docs/swagger.json`.
+- Envelope: `{ success: true, data }`, errors `{ success: false, error: { code, message, details? } }`. Unknown paths return Fastify's `{ message, error, statusCode }`.
+- Merchant lists: `data: { items, total, page, limit, totalPages }` (`ApiPaginated<T>`).
+- All fields camelCase. The login `user` is `{ id, email, firstName, lastName, role }`, role ∈ `owner | manager | staff | viewer`. There is no merchant name, avatar or permissions list in the auth responses.
+
+**Client implementation** (`src/lib/api/`)
+- `_transport.ts` — `request<T>()` returns the unwrapped `data` and throws `ApiError` (an `Error` subclass with `status`, `code`, `details`). Sends `Authorization: Bearer`. On 401 it refreshes once (shared by concurrent requests) and retries; if that fails it clears the session and dispatches `auth:unauthorized`. `NEXT_PUBLIC_USE_MOCK=true` returns each call's `mock` instead.
+- `session.ts` — tokens, `tenantSlug` and user in `localStorage`, plus a non-sensitive `sabyy_session` marker cookie for the route proxy.
+- `auth.api.ts` — `loginUser`, `logoutUser`, `getMe`. The login form asks for the business handle (`tenantSlug`), prefilled from the last login on the device.
+
+**Divergence from the plan: no BFF yet.** The browser calls the backend directly and keeps tokens in `localStorage`, so an XSS bug could read them. Moving to the planned BFF means Next route handlers that call the backend, keep the tokens in httpOnly cookies they set themselves (the backend sets none), and attach `Authorization` server-side; `_transport.ts` would then call `/api/*` without a token. The rest of the client API surface (`request`, `ApiError`, `*.api.ts`) can stay the same.
 
 
 1. Since we are not yet implementing encryption, we will send plain json and the backend to is returning plain JSON back to us

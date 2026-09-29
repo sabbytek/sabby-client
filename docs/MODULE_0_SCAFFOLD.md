@@ -192,130 +192,15 @@ mkdir -p \
 
 ## Step 5: Build Mock Transport Layer
 
-**`lib/api/types.ts` — API envelope and error types:**
+> **Superseded (2026-09-29).** The transport originally sketched here assumed a `{ status, code, message, payload }` envelope and snake_case auth fields; the backend uses neither. The current code is in `src/lib/api/` (`_transport.ts`, `types.ts`, `session.ts`, `auth.api.ts`), and the verified contract is under *API Integration Status* in `IMPLEMENTATION_PLAN.md`.
 
-```typescript
-/**
- * Standard response envelope from backend.
- * Confirm actual shape with backend dev — this assumes a wrapper.
- */
-export type ApiEnvelope<TPayload = unknown> = {
-  status?: boolean;
-  code?: number;
-  message?: string;
-  payload?: TPayload;
-};
+In short: `request<T>({ path, method, body?, query?, auth?, mock? })` calls `NEXT_PUBLIC_API_BASE_URL + path`, returns the unwrapped `data`, and throws `ApiError`. With `NEXT_PUBLIC_USE_MOCK=true` it returns `mock` instead.
 
-export type ApiListResponse<T> = {
-  data: T[];
-  pagination?: {
-    page: number;
-    limit: number;
-    total: number;
-    totalPages: number;
-  };
-};
-
-export type ApiError = {
-  message: string;
-  status?: number;
-  code?: string;
-  details?: unknown;
-};
-```
-
-**`lib/api/_transport.ts` — Client-side request helper (with mock support):**
-
-```typescript
-import type { ApiEnvelope, ApiError } from "@/lib/api/types";
-
-const USE_MOCK = process.env.NEXT_PUBLIC_USE_MOCK === "true";
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3000";
-
-type RequestApiOptions = {
-  url: string;
-  method: "GET" | "POST" | "PATCH" | "DELETE";
-  payload?: unknown;
-};
-
-function normalizeApiError(responseStatus: number, body: unknown): ApiError {
-  const b = body as Record<string, unknown> | undefined;
-  return {
-    message: b?.message ?? "Request failed",
-    status: responseStatus,
-    code: String(b?.code ?? "ERR_REQUEST_FAILED"),
-    details: body,
-  };
-}
-
-/**
- * Client-side request helper. Routes through /app/api/* (BFF proxy).
- * On 401, dispatches auth:unauthorized for central session handling.
- */
-export async function requestApi<TPayload = unknown>(
-  options: RequestApiOptions,
-): Promise<ApiEnvelope<TPayload>> {
-  let body: string | undefined;
-  if (options.payload !== undefined) {
-    body = JSON.stringify(options.payload);
-  }
-
-  const response = await fetch(options.url, {
-    method: options.method,
-    headers: { "Content-Type": "application/json" },
-    credentials: "include",
-    body,
-  });
-
-  let raw: unknown = {};
-  try {
-    raw = await response.json();
-  } catch {
-    raw = { status: false, message: "Invalid response format" };
-  }
-
-  if (!response.ok) {
-    if (response.status === 401 && typeof window !== "undefined") {
-      window.dispatchEvent(new CustomEvent("auth:unauthorized"));
-    }
-    throw normalizeApiError(response.status, raw);
-  }
-
-  return (raw as ApiEnvelope<TPayload>) || { payload: raw as TPayload };
-}
-
-/**
- * Mock request helper — returns fake data for testing UI without backend.
- * Respects the same envelope shape.
- */
-export async function requestApiMock<TPayload = unknown>(
-  options: RequestApiOptions,
-  mockData: TPayload,
-): Promise<ApiEnvelope<TPayload>> {
-  // Simulate network latency
-  await new Promise((r) => setTimeout(r, 300));
-  return { status: true, code: 200, payload: mockData };
-}
-
-/**
- * Smart wrapper: uses mock data in dev, real API in production.
- * Flip NEXT_PUBLIC_USE_MOCK env var to control.
- */
-export async function request<TPayload = unknown>(
-  options: RequestApiOptions & { mock?: TPayload },
-): Promise<ApiEnvelope<TPayload>> {
-  if (USE_MOCK && options.mock) {
-    return requestApiMock(options, options.mock);
-  }
-  return requestApi<TPayload>(options);
-}
-```
-
-**`.env.local` — Enable mock mode during development:**
+**`.env.local`** (see `.env.example`):
 
 ```
-NEXT_PUBLIC_USE_MOCK=true
-NEXT_PUBLIC_API_BASE_URL=http://localhost:3000
+NEXT_PUBLIC_API_BASE_URL=http://localhost:5001
+NEXT_PUBLIC_USE_MOCK=false
 ```
 
 ---
@@ -517,7 +402,7 @@ Once this scaffold is solid:
 5. Build sidebar + top bar shell
 6. Wire up Guard + FeatureGate components
 
-**All using mock data.** When backend is ready, flip `NEXT_PUBLIC_USE_MOCK=false` and it hits the real API.
+Login, logout and session handling now run against the real API (`NEXT_PUBLIC_USE_MOCK=false`). Set it to `true` to use mock data without a backend.
 
 ---
 
