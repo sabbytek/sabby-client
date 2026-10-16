@@ -70,13 +70,13 @@ export default function LandingPage() {
           <div className="flex items-center gap-unit-md">
             <a
               className="hidden md:block font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors"
-              href="#"
+              href="/login"
             >
               Log in
             </a>
             <a
               className="bg-primary-container text-white font-label-md text-label-md px-4 py-2 rounded-lg hover:opacity-90 transition-opacity"
-              href="#"
+              href="/login"
             >
               Start for free
             </a>
@@ -108,18 +108,18 @@ export default function LandingPage() {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <a
               className="w-full sm:w-auto bg-primary-container text-white font-label-md text-label-md px-8 py-4 rounded-lg hover:opacity-90 transition-opacity shadow-lg shadow-primary/25 flex items-center justify-center gap-2"
-              href="#"
+              href="/login"
             >
               Start for free
               <ArrowRight size={18} />
             </a>
-            <a
-              className="w-full sm:w-auto bg-white text-on-surface font-label-md text-label-md px-8 py-4 rounded-lg hover:bg-surface-container transition-colors border border-outline-variant flex items-center justify-center gap-2"
-              href="#"
+            <span
+              className="w-full sm:w-auto bg-white text-on-surface-variant/50 font-label-md text-label-md px-8 py-4 rounded-lg border border-outline-variant/50 flex items-center justify-center gap-2 cursor-not-allowed select-none"
+              title="Demo coming soon"
             >
               <PlayCircle size={18} />
               Watch the demo
-            </a>
+            </span>
           </div>
         </div>
 
@@ -339,7 +339,7 @@ export default function LandingPage() {
               </ul>
               <a
                 className="text-primary font-label-md text-label-md flex items-center gap-1 hover:underline"
-                href="#"
+                href="/login"
               >
                 Explore Storefronts <ArrowRight size={18} />
               </a>
@@ -543,14 +543,14 @@ export default function LandingPage() {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <a
               className="w-full sm:w-auto bg-primary text-white font-label-md text-label-md px-8 py-4 rounded-lg hover:bg-primary/90 transition-colors shadow-lg shadow-primary/25 flex items-center justify-center gap-2"
-              href="#"
+              href="/login"
             >
               Start for free
               <ArrowRight size={18} />
             </a>
             <a
               className="w-full sm:w-auto bg-white text-on-surface font-label-md text-label-md px-8 py-4 rounded-lg hover:bg-surface-container transition-colors border border-outline-variant flex items-center justify-center gap-2"
-              href="#"
+              href="mailto:sabbytek@gmail.com"
             >
               Talk to Sales
             </a>
