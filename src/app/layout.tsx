@@ -23,11 +23,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <AuthProvider>
-          <QueryProvider>
+        <QueryProvider>
+          <AuthProvider>
             {children}
-          </QueryProvider>
-        </AuthProvider>
+          </AuthProvider>
+        </QueryProvider>
       </body>
     </html>
   );

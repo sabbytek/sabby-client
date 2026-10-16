@@ -16,6 +16,8 @@ type RequestOptions<TData> = {
   auth?: boolean;
   /** Returned instead of calling the backend when NEXT_PUBLIC_USE_MOCK=true. */
   mock?: TData;
+  /** "text" returns the raw body (e.g. CSV exports) instead of unwrapping the JSON envelope. */
+  responseType?: "json" | "text";
 };
 
 export const isMockMode = USE_MOCK;
@@ -76,7 +78,11 @@ async function send(
   }
 }
 
-async function parse<TData>(response: Response): Promise<TData> {
+async function parse<TData>(response: Response, responseType: "json" | "text" = "json"): Promise<TData> {
+  if (responseType === "text" && response.ok) {
+    return (await response.text()) as TData;
+  }
+
   let raw: unknown;
   try {
     raw = await response.json();
@@ -152,11 +158,11 @@ export async function request<TData = unknown>(options: RequestOptions<TData>): 
     const newToken = await refreshOnce();
     if (!newToken) {
       endSession();
-      return parse<TData>(response);
+      return parse<TData>(response, options.responseType);
     }
     response = await send(url, options.method, options.body, newToken);
     if (response.status === 401) endSession();
   }
 
-  return parse<TData>(response);
+  return parse<TData>(response, options.responseType);
 }
