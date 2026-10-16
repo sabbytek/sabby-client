@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useContext, useState, useEffect, useCallback } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { loginUser, logoutUser, getMe } from "@/lib/api/auth.api";
 import { clearSession, getSession, storeSession } from "@/lib/api/session";
 import { ApiError } from "@/lib/api/types";
@@ -33,6 +34,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [tenantSlug, setTenantSlug] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  // Cached queries hold tenant data; drop them whenever the signed-in user changes.
+  const queryClient = useQueryClient();
 
   // Initialize auth state from storage on mount. This must run in an
   // effect (not a useState initializer) so server and client first renders match.
@@ -60,11 +63,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(null);
       setTenantSlug(null);
       setError("Session expired. Please login again.");
+      queryClient.clear();
     };
 
     window.addEventListener("auth:unauthorized", handleUnauthorized);
     return () => window.removeEventListener("auth:unauthorized", handleUnauthorized);
-  }, []);
+  }, [queryClient]);
 
   const login = useCallback(async (slug: string, email: string, password: string) => {
     setIsLoading(true);
@@ -73,6 +77,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const response = await loginUser({ tenantSlug: slug, email, password });
 
+      queryClient.clear();
       storeSession({
         accessToken: response.accessToken,
         refreshToken: response.refreshToken,
@@ -88,7 +93,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [queryClient]);
 
   const logout = useCallback(async () => {
     setIsLoading(true);
@@ -102,12 +107,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.error("Logout error:", err);
     } finally {
       clearSession();
+      queryClient.clear();
       setUser(null);
       setTenantSlug(null);
       setError(null);
       setIsLoading(false);
     }
-  }, []);
+  }, [queryClient]);
 
   return (
     <AuthContext.Provider
