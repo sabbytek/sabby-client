@@ -22,7 +22,14 @@ const loginSchema = z.object({
 
 type LoginFormData = z.infer<typeof loginSchema>;
 
-export function LoginForm() {
+type LoginFormProps = {
+  /** Show the "account created" notice (set after a successful signup). */
+  registered?: boolean;
+  /** Business handle to prefill, overriding the last-used one. */
+  initialHandle?: string;
+};
+
+export function LoginForm({ registered, initialHandle }: LoginFormProps) {
   const router = useRouter();
   const { login, isLoading, error: authError } = useAuth();
   const [localError, setLocalError] = useState<string | null>(null);
@@ -38,9 +45,9 @@ export function LoginForm() {
 
   // Prefill the business handle used last time on this device.
   useEffect(() => {
-    const lastSlug = getLastTenantSlug();
-    if (lastSlug) setValue("tenantSlug", lastSlug);
-  }, [setValue]);
+    const slug = initialHandle || getLastTenantSlug();
+    if (slug) setValue("tenantSlug", slug);
+  }, [setValue, initialHandle]);
 
   const onSubmit = async (data: LoginFormData) => {
     setLocalError(null);
@@ -59,6 +66,14 @@ export function LoginForm() {
       <div className="bg-surface border border-border rounded-lg p-8">
         <h1 className="text-2xl font-bold text-foreground mb-2">Welcome Back</h1>
         <p className="text-secondary mb-8">Sign in to your merchant dashboard</p>
+
+        {registered && (
+          <div className="mb-6 p-3 bg-accent-light border border-accent-soft rounded-md">
+            <p className="text-sm text-foreground">
+              Account created. Sign in with your business handle and password.
+            </p>
+          </div>
+        )}
 
         {(authError || localError) && (
           <div className="mb-6 p-3 bg-danger-bg border border-danger rounded-md">

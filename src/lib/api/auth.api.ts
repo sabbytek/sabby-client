@@ -1,5 +1,12 @@
 import { request } from "@/lib/api/_transport";
-import type { LoginRequest, LoginResponse, MeResponse, User } from "@/lib/api/auth.types";
+import type {
+  LoginRequest,
+  LoginResponse,
+  MeResponse,
+  SignupRequest,
+  SignupResponse,
+  User,
+} from "@/lib/api/auth.types";
 
 // Mock data, used only when NEXT_PUBLIC_USE_MOCK=true
 const MOCK_USER: User = {
@@ -20,6 +27,20 @@ export function loginUser(payload: LoginRequest): Promise<LoginResponse> {
       user: MOCK_USER,
       accessToken: "mock_access_token",
       refreshToken: "mock_refresh_token",
+    },
+  });
+}
+
+export function signupMerchant(payload: SignupRequest): Promise<SignupResponse> {
+  return request<SignupResponse>({
+    path: "/v1/tenants",
+    method: "POST",
+    body: payload,
+    auth: false,
+    mock: {
+      tenantId: "tenant_456",
+      slug: payload.slug,
+      message: "Tenant provisioned successfully. Use your business email to log in.",
     },
   });
 }
