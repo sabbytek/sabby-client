@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { Eye, EyeOff } from "lucide-react";
 import { signupMerchant } from "@/lib/api/auth.api";
 import { ApiError } from "@/lib/api/types";
 
@@ -22,12 +23,36 @@ const signupSchema = z.object({
   businessEmail: z.string().email("Invalid email address"),
   businessPhone: z.string().trim().optional(),
   ownerPassword: z.string().min(8, "Password must be at least 8 characters"),
+  confirmPassword: z.string().min(1, "Confirm your password"),
+}).refine((data) => data.ownerPassword === data.confirmPassword, {
+  message: "Passwords do not match",
+  path: ["confirmPassword"],
 });
 
 type SignupFormData = z.infer<typeof signupSchema>;
 
 const INPUT_CLASS =
   "w-full px-4 py-2 border border-border rounded-md bg-background text-foreground placeholder:text-secondary focus:outline-none focus:border-accent";
+
+function PasswordInput({
+  show,
+  onToggle,
+  ...props
+}: React.ComponentProps<"input"> & { show: boolean; onToggle: () => void }) {
+  return (
+    <div className="relative">
+      <input {...props} type={show ? "text" : "password"} className={`${INPUT_CLASS} pr-11`} />
+      <button
+        type="button"
+        onClick={onToggle}
+        aria-label={show ? "Hide password" : "Show password"}
+        className="absolute inset-y-0 right-0 px-3 text-secondary hover:text-foreground"
+      >
+        {show ? <EyeOff size={18} /> : <Eye size={18} />}
+      </button>
+    </div>
+  );
+}
 
 function slugify(value: string): string {
   return value
@@ -41,6 +66,8 @@ export function SignupForm() {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [slugTouched, setSlugTouched] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
 
   const {
     register,
@@ -56,8 +83,13 @@ export function SignupForm() {
 
     try {
       const result = await signupMerchant({
-        ...data,
+        name: data.name,
+        slug: data.slug,
+        businessEmail: data.businessEmail,
         businessPhone: data.businessPhone || undefined,
+        ownerFirstName: data.ownerFirstName,
+        ownerLastName: data.ownerLastName,
+        ownerPassword: data.ownerPassword,
       });
       router.push(`/login?registered=1&handle=${encodeURIComponent(result.slug)}`);
     } catch (err) {
@@ -196,17 +228,35 @@ export function SignupForm() {
             <label htmlFor="ownerPassword" className="block text-sm font-medium text-foreground mb-2">
               Password
             </label>
-            <input
+            <PasswordInput
               id="ownerPassword"
-              type="password"
               autoComplete="new-password"
               {...register("ownerPassword")}
               placeholder="••••••••"
-              className={INPUT_CLASS}
               disabled={isSubmitting}
+              show={showPassword}
+              onToggle={() => setShowPassword((v) => !v)}
             />
             {errors.ownerPassword && (
               <p className="mt-1 text-sm text-danger">{errors.ownerPassword.message}</p>
+            )}
+          </div>
+
+          <div>
+            <label htmlFor="confirmPassword" className="block text-sm font-medium text-foreground mb-2">
+              Confirm Password
+            </label>
+            <PasswordInput
+              id="confirmPassword"
+              autoComplete="new-password"
+              {...register("confirmPassword")}
+              placeholder="••••••••"
+              disabled={isSubmitting}
+              show={showConfirm}
+              onToggle={() => setShowConfirm((v) => !v)}
+            />
+            {errors.confirmPassword && (
+              <p className="mt-1 text-sm text-danger">{errors.confirmPassword.message}</p>
             )}
           </div>
 
