@@ -1,7 +1,13 @@
 import Link from "next/link";
 import { LoginForm } from "@/components/auth/login-form";
 
-export default function LoginPage() {
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ registered?: string; handle?: string }>;
+}) {
+  const { registered, handle } = await searchParams;
+
   return (
     <main className="min-h-screen bg-gradient-to-br from-background to-surface flex items-center justify-center p-4">
       <div className="w-full">
@@ -14,15 +20,15 @@ export default function LoginPage() {
         </div>
 
         {/* Login Form */}
-        <LoginForm />
+        <LoginForm registered={registered === "1"} initialHandle={handle} />
 
         {/* Footer */}
         <div className="mt-8 text-center">
           <p className="text-secondary text-sm">
             Don&apos;t have an account?{" "}
-            <a href="#" className="text-accent hover:text-accent-hover font-medium">
-              Contact support
-            </a>
+            <Link href="/signup" className="text-accent hover:text-accent-hover font-medium">
+              Sign up
+            </Link>
           </p>
         </div>
       </div>

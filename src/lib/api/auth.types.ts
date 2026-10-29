@@ -33,3 +33,20 @@ export type MeResponse = {
   email: string;
   role: UserRole;
 };
+
+/** POST /v1/tenants — public merchant signup. */
+export type SignupRequest = {
+  name: string;
+  slug: string;
+  businessEmail: string;
+  businessPhone?: string;
+  ownerFirstName: string;
+  ownerLastName: string;
+  ownerPassword: string;
+};
+
+export type SignupResponse = {
+  tenantId: string;
+  slug: string;
+  message: string;
+};
